@@ -10,7 +10,7 @@ export class generateBlogContentDto {
     title: string
 }
 
-export class generateBlogIdeaDto {
+export class generateIdeaDto {
     productInfo: productDto
     mood: string
 }

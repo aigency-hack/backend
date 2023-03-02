@@ -11,7 +11,7 @@ import {
     UseGuards,
     UseInterceptors,
 } from '@nestjs/common';
-import { generateBlogIdeaDto } from './gency.dto';
+import { generateBlogContentDto, generateIdeaDto } from './gency.dto';
 import { GencyService } from './gency.service';
 
 @Controller('gency')
@@ -22,11 +22,19 @@ export class GencyController {
 
     }
 
-    @Post('blog/ideas')
-    async getBlogIdeas(
-        @Body() dto: generateBlogIdeaDto
+    @Post('ideas')
+    async getIdeas(
+        @Body() dto: generateIdeaDto
     ): Promise<string[]> {
-        const ideas = await this.gencyService.getBlogIdeas(dto.productInfo)
+        const ideas = await this.gencyService.getBlogIdeas(dto.productInfo, dto.mood)
+        return ideas
+    }
+
+    @Post('blog')
+    async getBlog(
+        @Body() dto: generateBlogContentDto
+    ): Promise<string[]> {
+        const ideas = await this.gencyService.getBlogIdeas(dto.productInfo, dto.mood)
         return ideas
     }
 }
