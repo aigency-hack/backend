@@ -11,7 +11,7 @@ import {
     UseGuards,
     UseInterceptors,
 } from '@nestjs/common';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { Blog, GenerateBlogContentDto, GenerateIdeaDto, GenerateShortPostDto, ShortPost } from './gency.dto';
 import { GencyService } from './gency.service';
 
@@ -23,6 +23,11 @@ export class GencyController {
 
     }
 
+    @ApiOkResponse({
+        description: 'list of ideas',
+        type: 'string',
+        isArray: true
+    })
     @Post('ideas')
     async getIdeas(
         @Body() dto: GenerateIdeaDto
@@ -31,6 +36,11 @@ export class GencyController {
         return ideas
     }
 
+    @ApiOkResponse({
+        description: 'blog object',
+        type: Blog,
+        isArray: false
+    })
     @Post('blog')
     async getBlog(
         @Body() dto: GenerateBlogContentDto
@@ -38,6 +48,11 @@ export class GencyController {
         return await this.gencyService.getBlog(dto.productInfo, dto.mood, dto.title)
     }
 
+    @ApiOkResponse({
+        description: 'post object',
+        type: ShortPost,
+        isArray: false
+    })
     @Post('post')
     async getPost(
         @Body() dto: GenerateShortPostDto

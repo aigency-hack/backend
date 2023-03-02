@@ -25,15 +25,20 @@ export class GenerateIdeaDto {
     mood: string
 }
 
-export class Blog {
-    title: string
-    paragraphs: BlogParagraph[]
-    images: string[]
+export class BlogParagraph {
+    @ApiProperty()
+    topic: string
+    @ApiProperty()
+    content: string
 }
 
-export class BlogParagraph {
-    topic: string
-    content: string
+export class Blog {
+    @ApiProperty()
+    title: string
+    @ApiProperty({ isArray: true, type: BlogParagraph })
+    paragraphs: BlogParagraph[]
+    @ApiProperty({ isArray: true, type: 'string' })
+    images: string[]
 }
 
 export class GenerateShortPostDto {
@@ -46,7 +51,10 @@ export class GenerateShortPostDto {
 }
 
 export class ShortPost {
+    @ApiProperty()
     content: string
+    @ApiProperty()
     keyword: string
+    @ApiProperty()
     images: string[]
 }
