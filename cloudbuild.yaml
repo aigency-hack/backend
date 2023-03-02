@@ -1,0 +1,40 @@
+steps:
+  # Build and push the container image
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    id: build
+    waitFor:
+      - '-'
+    args:
+      - --destination
+      - gcr.io/$PROJECT_ID/${REPO_NAME}:${_APP_NAME}_${BRANCH_NAME}
+      - --build-arg
+      - APP_NAME=${_APP_NAME}
+      - --cache=true
+
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      [
+        'run',
+        'deploy',
+        '${_SERVICE_NAME}-${_APP_ENV}',
+        '--image',
+        'gcr.io/$PROJECT_ID/${REPO_NAME}:${_APP_NAME}_${BRANCH_NAME}',
+        '--region',
+        '${_REGION}',
+        '--platform',
+        'managed',
+        '--allow-unauthenticated',
+      ]
+    waitFor: ['build']
+
+substitutions:
+  _SERVICE_NAME: aigency-backend
+  _REGION: asia-southeast1
+  _GITHUB_OWNER: ${_OWNER:-apemon}
+
+options:
+  dynamicSubstitutions: true
+  machineType: 'UNSPECIFIED'
+
+timeout: 1200s
