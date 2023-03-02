@@ -11,6 +11,7 @@ import {
     UseGuards,
     UseInterceptors,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { Blog, GenerateBlogContentDto, GenerateIdeaDto, GenerateShortPostDto, ShortPost } from './gency.dto';
 import { GencyService } from './gency.service';
 
