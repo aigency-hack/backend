@@ -17,7 +17,7 @@ steps:
       [
         'run',
         'deploy',
-        '${_SERVICE_NAME}-${_APP_ENV}',
+        '${_SERVICE_NAME}',
         '--image',
         'gcr.io/$PROJECT_ID/${REPO_NAME}:${_APP_NAME}_${BRANCH_NAME}',
         '--region',
