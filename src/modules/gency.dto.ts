@@ -25,3 +25,15 @@ export class BlogParagraph {
     topic: string
     content: string
 }
+
+export class GenerateShortPostDto {
+    productInfo: ProductDto
+    mood: string
+    purpose?: string
+}
+
+export class ShortPost {
+    content: string
+    keyword: string
+    images: string[]
+}

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Configuration, OpenAIApi } from 'openai';
-import { Blog, BlogParagraph, ProductDto } from './gency.dto';
+import { Blog, BlogParagraph, ProductDto, ShortPost } from './gency.dto';
 
 @Injectable()
 export class GencyService {
@@ -81,7 +81,7 @@ export class GencyService {
                     }
                 ]
             })
-            newTitle = titleResponse.data.choices[0].message.content
+            newTitle = titleResponse.data.choices[0].message.content.replace(/"/g, '')
         } else {
             newTitle = title
         }
@@ -160,25 +160,56 @@ export class GencyService {
         return blog
     }
 
-    // async getBlog(
-    //     productInfo: productDto,
-    //     mood: string,
-    //     title: string
-    // ) {
-    //     const response = await this.openai.createChatCompletion({
-    //         model: 'gpt-3.5-turbo',
-    //         temperature: 0.8,
-    //         messages: [
-    //             {
-    //                 "role": "system",
-    //                 "content": `You are copy writer assistant with ${mood} tone. You will helping to write a blog post to give knowledge about customer product. Post is limited to 200-300 words.`
-    //             },
-    //             {
-    //                 "role": "user",
-    //                 "content": `My product name is "${productInfo.name}", ${productInfo.description}. The unique selling point of this product is ${productInfo.usp}`
-    //             }
-    //         ]
-    //     })
-    //     console.log(response.data.choices[0].message)
-    // }
+    async getPost(
+        productInfo: ProductDto,
+        mood: string,
+        purpose: string = 'to give knowledge about my product category'
+    ): Promise<ShortPost> {
+        const contentResponse = await this.openai.createChatCompletion({
+            model: 'gpt-3.5-turbo',
+            temperature: 0.8,
+            messages: [
+                {
+                    "role": "system",
+                    "content": `You are copy writer assistant with ${mood} tone. You will helping to write a social network post. The content is about user product with the propose is "${purpose}". Post is limited to 200-300 words with only 1 paragraph. You don't need to mention product name in this post`
+                },
+                {
+                    "role": "user",
+                    "content": `Please, write a 1 paragraph for social network content. My product name is "${productInfo.name}", ${productInfo.description}. The unique selling point of this product is ${productInfo.usp}`
+                }
+            ]
+        })
+        const content = contentResponse.data.choices[0].message.content
+        // concept
+        const conceptResponse = await this.openai.createChatCompletion({
+            model: 'gpt-3.5-turbo',
+            temperature: 0.8,
+            messages: [
+                {
+                    "role": "user",
+                    "content": `Please, Extract keywords from this text:${content}`
+                },
+                {
+                    "role": "assistant",
+                    "content": "keyword: "
+                }
+            ]
+        })
+        const concept = conceptResponse.data.choices[0].message.content
+        // image
+        const imageResponse = await this.openai.createImage({
+            prompt: `${concept}`,
+            n: 2,
+            size: '1024x1024'
+        })
+        let images = []
+        imageResponse.data.data.forEach(img => {
+            images.push(img.url)
+        })
+        return {
+            content,
+            keyword: concept,
+            images
+        }
+    }
 }

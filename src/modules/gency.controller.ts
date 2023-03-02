@@ -11,7 +11,7 @@ import {
     UseGuards,
     UseInterceptors,
 } from '@nestjs/common';
-import { Blog, GenerateBlogContentDto, GenerateIdeaDto } from './gency.dto';
+import { Blog, GenerateBlogContentDto, GenerateIdeaDto, GenerateShortPostDto, ShortPost } from './gency.dto';
 import { GencyService } from './gency.service';
 
 @Controller('gency')
@@ -35,5 +35,12 @@ export class GencyController {
         @Body() dto: GenerateBlogContentDto
     ): Promise<Blog> {
         return await this.gencyService.getBlog(dto.productInfo, dto.mood, dto.title)
+    }
+
+    @Post('post')
+    async getPost(
+        @Body() dto: GenerateShortPostDto
+    ): Promise<ShortPost> {
+        return await this.gencyService.getPost(dto.productInfo, dto.mood, dto.purpose)
     }
 }
