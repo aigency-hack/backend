@@ -11,6 +11,8 @@ import {
   UseGuards,
   UseInterceptors,
   CacheInterceptor,
+  CacheKey,
+  CacheTTL,
 } from '@nestjs/common';
 import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import {
@@ -22,9 +24,10 @@ import {
 } from './gency.dto';
 import { GencyService } from './gency.service';
 
+@UseInterceptors(CacheInterceptor)
 @Controller('gency')
 export class GencyController {
-  constructor(private readonly gencyService: GencyService) {}
+  constructor(private readonly gencyService: GencyService) { }
 
   @ApiOkResponse({
     description: 'list of ideas',
