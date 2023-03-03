@@ -4,7 +4,6 @@ import { Configuration, OpenAIApi } from 'openai';
 import { Blog, BlogParagraph, ProductDto, ShortPost } from './gency.dto';
 import { Cache } from 'cache-manager';
 
-
 @Injectable()
 export class GencyService {
   openai: OpenAIApi;
@@ -25,7 +24,8 @@ export class GencyService {
     mood: string = 'relaxed',
   ): Promise<string[]> {
     let response;
-    const cachedData = await this.cacheService.get(JSON.stringify(productInfo));
+    const key = { mood, ...productInfo };
+    const cachedData = await this.cacheService.get(JSON.stringify(key));
     if (cachedData) {
       response = cachedData;
     } else {
@@ -98,24 +98,31 @@ export class GencyService {
       newTitle = title;
     }
     // get outline
-    const outlineResponse = await this.openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      temperature: 0.8,
-      messages: [
-        {
-          role: 'system',
-          content: `You are copy writer, who always think and write content about customer product in ${mood} tone. User will tell you about product name, product description and product unique selling point and you can use all of these information to create content about user product ideas. Sometime, you may not need to mention product name in the topic, just create content that will help customer have more knowledge about this product category.`,
-        },
-        {
-          role: 'user',
-          content: `My product name is "${productInfo.name}", ${productInfo.description}. The unique selling point of this product is ${productInfo.usp}. Please, create a blog outline topics about my product with less than 8 topics in bullet format. You don't need to explain about the topic and don't need to mention the product name in every topic. The title of this blog is "${newTitle}"`,
-        },
-        {
-          role: 'assistant',
-          content: '1.) ',
-        },
-      ],
-    });
+    const key = { mood, newTitle, ...productInfo };
+    let outlineResponse;
+    const cachedData = await this.cacheService.get(JSON.stringify(key));
+    if (cachedData) {
+      outlineResponse = cachedData;
+    } else {
+      outlineResponse = await this.openai.createChatCompletion({
+        model: 'gpt-3.5-turbo',
+        temperature: 0.8,
+        messages: [
+          {
+            role: 'system',
+            content: `You are copy writer, who always think and write content about customer product in ${mood} tone. User will tell you about product name, product description and product unique selling point and you can use all of these information to create content about user product ideas. Sometime, you may not need to mention product name in the topic, just create content that will help customer have more knowledge about this product category.`,
+          },
+          {
+            role: 'user',
+            content: `My product name is "${productInfo.name}", ${productInfo.description}. The unique selling point of this product is ${productInfo.usp}. Please, create a blog outline topics about my product with less than 8 topics in bullet format. You don't need to explain about the topic and don't need to mention the product name in every topic. The title of this blog is "${newTitle}"`,
+          },
+          {
+            role: 'assistant',
+            content: '1.) ',
+          },
+        ],
+      });
+    }
     let topics = [];
     const outlines =
       outlineResponse.data.choices[0].message.content.split('\n');
