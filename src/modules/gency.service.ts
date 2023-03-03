@@ -188,20 +188,27 @@ export class GencyService {
     mood: string,
     purpose: string = 'to give knowledge about my product category',
   ): Promise<ShortPost> {
-    const contentResponse = await this.openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      temperature: 0.8,
-      messages: [
-        {
-          role: 'system',
-          content: `You are copy writer assistant with ${mood} tone. You will helping to write a social network post. The content is about user product with the propose is "${purpose}". Post is limited to 200-300 words with only 1 paragraph. You don't need to mention product name in this post`,
-        },
-        {
-          role: 'user',
-          content: `Please, write a 1 paragraph for social network content. My product name is "${productInfo.name}", ${productInfo.description}. The unique selling point of this product is ${productInfo.usp}`,
-        },
-      ],
-    });
+    const key = { mood, ...productInfo, purpose };
+    let contentResponse;
+    const cachedData = await this.cacheService.get(JSON.stringify(key));
+    if (cachedData) {
+      contentResponse = cachedData;
+    } else {
+      contentResponse = await this.openai.createChatCompletion({
+        model: 'gpt-3.5-turbo',
+        temperature: 0.8,
+        messages: [
+          {
+            role: 'system',
+            content: `You are copy writer assistant with ${mood} tone. You will helping to write a social network post. The content is about user product with the propose is "${purpose}". Post is limited to 200-300 words with only 1 paragraph. You don't need to mention product name in this post`,
+          },
+          {
+            role: 'user',
+            content: `Please, write a 1 paragraph for social network content. My product name is "${productInfo.name}", ${productInfo.description}. The unique selling point of this product is ${productInfo.usp}`,
+          },
+        ],
+      });
+    }
     const content = contentResponse.data.choices[0].message.content;
     // concept
     const conceptResponse = await this.openai.createChatCompletion({
